@@ -11,6 +11,11 @@
     color and a variety, with the varietes adding extra points to the matches.
 ]]
 
+local shinyColors = {
+  [1] = {255 / 255, 255 / 255, 255 / 255, 127.5 / 255}, -- brighter shine
+  [2] = {255 / 255, 255 / 255, 255 / 255, 25.5 / 255} -- dimmer shine
+}
+
 Tile = Class{}
 
 function Tile:init(x, y, color, variety)
@@ -26,6 +31,16 @@ function Tile:init(x, y, color, variety)
     -- tile appearance/points
     self.color = color
     self.variety = variety
+
+    self.isShiny = math.random(1, 2) == 1 and true or false
+    -- only set timer if tile is shiny
+    self.shinyTimer = self.isShiny and Timer.every(1.5, function()
+      local temp = shinyColors[1]
+      Timer.tween(1.5, {
+        [shinyColors[1]] = shinyColors[2],
+        [shinyColors[2]] = temp
+      })
+    end) or nil
 end
 
 function Tile:render(x, y)
@@ -39,4 +54,10 @@ function Tile:render(x, y)
     love.graphics.setColor(255 / 255, 255 / 255, 255 / 255, 255 / 255)
     love.graphics.draw(gTextures['main'], gFrames['tiles'][self.color][self.variety],
         self.x + x, self.y + y)
+
+    if self.isShiny then
+      love.graphics.setColor(shinyColors[1])
+      love.graphics.rectangle('fill', self.x + x, self.y + y, 32, 32, 4)
+      love.graphics.setColor(255 / 255, 255 / 255, 255 / 255, 255 / 255)
+    end
 end
