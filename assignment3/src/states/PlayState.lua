@@ -121,8 +121,8 @@ function PlayState:update(dt)
             gSounds['select']:play()
         end
 
-        -- if we've pressed enter, to select or deselect a tile...
-        if love.keyboard.wasPressed('enter') or love.keyboard.wasPressed('return') then
+        -- if we've pressed space, to select or deselect a tile...
+        if love.keyboard.wasPressed('space') then
 
             -- if same tile as currently highlighted, deselect
             local x = self.boardHighlightX + 1
@@ -193,9 +193,10 @@ function PlayState:calculateMatches()
         gSounds['match']:stop()
         gSounds['match']:play()
 
-        -- add score for each match
+        -- add score and add 1sec/tile to timer for each match
         for k, match in pairs(matches) do
             self.score = self.score + #match * 50
+            self.timer = self.timer + #match
         end
 
         -- remove any tiles that matched from the board, making empty spaces
