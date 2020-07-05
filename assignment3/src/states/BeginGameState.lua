@@ -26,12 +26,78 @@ function BeginGameState:init()
     self.levelLabelY = -64
 end
 
+function BeginGameState:possibleMatchExists()
+  -- for each tile, try swapping with each tile surrounding it and see if it
+  -- would result in a match
+  -- if there is at least one match, return true
+  local matchPossible = false;
+  for i = 1, 8 do
+    for j = 1, 8 do
+      -- get current tile
+      local thisTile = self.board.tiles[j][i]
+
+      for k = 1, 4 do -- for top, bottom, left, right
+        local otherTile = self.board.tiles[j][i]
+        -- get tile on top, bottom, left, or right if it exists
+        if k == 1 and j > 1 then
+          otherTile = self.board.tiles[j - 1][i]
+        elseif k == 2 and j < 8 then
+          otherTile = self.board.tiles[j + 1][i]
+        elseif k == 3 and i > 1 then
+          otherTile = self.board.tiles[j][i - 1]
+        elseif k == 4 and i < 8 then
+          otherTile = self.board.tiles[j][i + 1]
+        end
+
+        if thisTile ~= otherTile then
+          -- swap the tiles
+          local tempX = thisTile.gridX
+          local tempY = thisTile.gridY
+
+          thisTile.gridX = otherTile.gridX
+          thisTile.gridY = otherTile.gridY
+          otherTile.gridX = tempX
+          otherTile.gridY = tempY
+
+          -- swap tiles in the tiles table
+          self.board.tiles[otherTile.gridY][otherTile.gridX] = otherTile
+          self.board.tiles[thisTile.gridY][thisTile.gridX] = thisTile
+
+          -- check if possible match exists
+          -- (can't break or return here because we need to revert the tiles)
+          if self.board:calculateMatches() then
+            matchPossible = true;
+          end
+
+          -- return tiles to their original positions
+          otherTile.gridX = thisTile.gridX
+          otherTile.gridY = thisTile.gridY
+          thisTile.gridX = tempX
+          thisTile.gridY = tempY
+
+          self.board.tiles[thisTile.gridY][thisTile.gridX] = thisTile
+          self.board.tiles[otherTile.gridY][otherTile.gridX] = otherTile
+
+          if matchPossible then
+            break; -- no need to check rest of board
+          end
+        end
+      end
+    end
+  end
+
+  return matchPossible;
+end
+
 function BeginGameState:enter(def)
 
     -- grab level # from the def we're passed
     self.level = def.level
     -- spawn a board and place it toward the right
     self.board = Board(VIRTUAL_WIDTH - 272, 16, self.level)
+    while not self:possibleMatchExists() do
+      self.board = Board(VIRTUAL_WIDTH - 272, 16, self.level)
+    end
 
     --
     -- animate our white screen fade-in, then animate a drop-down with

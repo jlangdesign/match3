@@ -87,14 +87,14 @@ function PlayState:possibleMatchExists()
           local tempX = thisTile.gridX
           local tempY = thisTile.gridY
 
-          thisTile = otherTile.gridX
-          thisTile = otherTile.gridY
+          thisTile.gridX = otherTile.gridX
+          thisTile.gridY = otherTile.gridY
           otherTile.gridX = tempX
           otherTile.gridY = tempY
 
           -- swap tiles in the tiles table
-          self.board.tiles[j][i] = otherTile
-          self.board.tiles[otherTile.gridY][otherTile.gridX] = thisTile
+          self.board.tiles[otherTile.gridY][otherTile.gridX] = otherTile
+          self.board.tiles[thisTile.gridY][thisTile.gridX] = thisTile
 
           -- check if possible match exists
           -- (can't break or return here because we need to revert the tiles)
@@ -108,7 +108,7 @@ function PlayState:possibleMatchExists()
           thisTile.gridX = tempX
           thisTile.gridY = tempY
 
-          self.board.tiles[j][i] = thisTile
+          self.board.tiles[thisTile.gridY][thisTile.gridX] = thisTile
           self.board.tiles[otherTile.gridY][otherTile.gridX] = otherTile
 
           if matchPossible then
